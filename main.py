@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 import discord
-import json
 import requests
 import unicodedata
 from google import genai
@@ -34,8 +33,7 @@ def normalizar_texto(texto):
     )
 
 
-#Arrumar o estado que não é considerado na busca usando >>partes = message.split()<< 
-# >>cidade = " ".join(partes[:-1])<< >>estado = partes[-1].upper()<< e >>query = f"{cidade}, {estado}, BR"<<
+
 @client.command()
 async def clima(ctx, *, message):
     normalized_message = normalizar_texto(message)
@@ -53,10 +51,9 @@ async def clima(ctx, *, message):
         clima = data["current"]["condition"]["text"]
         estado = data["location"]["region"]
         temperatura = data["current"]["temp_c"]
-        await ctx.send(f"Cidade: {cidade}, {estado} com a temperatura de: {temperatura} e {clima}")
+        await ctx.reply(f"Cidade: {cidade}, {estado} com a temperatura de: {temperatura} e {clima}")
     except KeyError as e:
-        await ctx.send("❌ Cidade não encontrada ou erro na resposta da API.")
-        
+        await ctx.reply("❌ Cidade não encontrada ou erro na resposta da API.")
 
 @client.command()
 async def genai_mode(ctx):
@@ -71,9 +68,32 @@ async def genai_mode(ctx):
 async def on_message(message):
     global genai_mode
     str_message = str(message.content)
+    content = normalizar_texto(message.content.lower())
+
     # ignora mensagens do próprio bot
     if message.author.bot:
         return
+    elif genai_mode == False:
+        #Evento de resposta de palavras
+        #Melhorar usando triggers lambda
+        if any(word in content for word in ('gorda', 'gordinha')):
+            await message.reply(os.getenv("chaves_gif"))
+
+        elif any(word in content for word in ('povo prometido', 'israel')):
+            await message.reply(os.getenv("israel_gif"))
+
+        elif any(word in content for word in ('linard', 'linarde')):
+            await message.reply(os.getenv("linard_gif"))
+
+        elif any(word in content for word in ('true', 'verdade')):
+            await message.reply(os.getenv("true_gif"))
+
+        elif any(word in content for word in ('troll', 'trollando', 'trollface')):
+            if message.guild: 
+                for emoji in message.guild.emojis:
+                    if emoji.name == "trollface":
+                        await message.add_reaction(emoji)
+                        break
 
     # permite comandos funcionarem
     await client.process_commands(message)
@@ -104,7 +124,10 @@ async def on_message(message):
         await message.reply(text)
 
     except Exception as e:
+        genai_mode = False
+        await message.reply(f"Modo AI Desativado para proteção da API")
         await message.reply(f"Erro na API do Gemini:\n```{e}```")     
+
 
 
 client.run(TOKEN)
