@@ -6,7 +6,7 @@ import discord
 import requests
 import unicodedata
 from google import genai
-
+import random
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
@@ -63,13 +63,22 @@ async def genai_mode(ctx):
     status = "ativado" if genai_mode else "desativado"
     await ctx.reply(f"🧠 Modo IA {status}")
 
+@client.command()
+@commands.has_permissions(manage_messages=True)
+async def clear(ctx, amount: int):
+    await ctx.send(f"Deletando {amount} mensagens...", delete_after=3)
+    await ctx.channel.purge(limit=amount + 1)
+    await ctx.send(f"{amount} mensagens deletadas por {ctx.author.mention}", delete_after=3)
+
+
 #Implementar memoria na AI do google
 @client.event
 async def on_message(message):
     global genai_mode
     str_message = str(message.content)
     content = normalizar_texto(message.content.lower())
-
+    lista_resposta = ["que link legal", "sem graça", "nem ri", "XD"]
+    random_string = random.choice(lista_resposta)
     # ignora mensagens do próprio bot
     if message.author.bot:
         return
@@ -94,6 +103,8 @@ async def on_message(message):
                     if emoji.name == "trollface":
                         await message.add_reaction(emoji)
                         break
+        elif content.startswith("https") or content.startswith("http"):
+            await message.reply(random_string)
 
     # permite comandos funcionarem
     await client.process_commands(message)
