@@ -20,11 +20,7 @@ class MyClient(commands.Bot):
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
         global genai_mode
-        genai_mode = False
-
-    def get_channel(self, id):
-        return super().get_channel(id)
-   
+        genai_mode = False   
 
 client = MyClient(command_prefix='$', intents=intents)
 
@@ -79,7 +75,7 @@ async def on_message(message):
     global genai_mode
     str_message = str(message.content)
     content = normalizar_texto(message.content.lower())
-    lista_resposta = ["que link legal", "sem graça", "nem ri", "XD", "que link bosta morre", "gostei desse link", "não achei graça", "rídiculo", ]
+    lista_resposta = ["que link legal", "sem graça", "nem ri", "XD", "que link bosta morre", "gostei desse link", "não achei graça", "rídiculo", ":v" ]
     random_string = random.choice(lista_resposta)
 
     TRIGGERS_REPLY = {
