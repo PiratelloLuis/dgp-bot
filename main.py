@@ -75,8 +75,8 @@ async def on_message(message):
     global genai_mode
     str_message = str(message.content)
     content = normalizar_texto(message.content.lower())
-    lista_resposta = ["que link legal", "sem graça", "nem ri", "XD", "que link bosta morre", "gostei desse link", "não achei graça", "rídiculo", ":v" ]
-    random_string = random.choice(lista_resposta)
+    #lista_resposta = ["que link legal", "sem graça", "nem ri", "XD", "que link bosta morre", "gostei desse link", "não achei graça", "rídiculo", ":v", "cuzão se vc n quer emoção só segue sua vida mano entendeu corolla 2008 xei automático prata NOSSA que maravilha hein irmão pega sua mina aniversário de namoro já leva ela no outback né ribs on the barbie ooo mano q diferente hein tá ligado já porra passa no shopping no cinema vai ver o que? Filme da marvel vê um filme da marvel viado sai do filme da marvel já passa na centauro cuzão pega o que? Um tênis mizuno de corrida preto de 300 reais igual a TODOS os outros que é a sua cara cuzão já saí passa na Renner pega uma camisa branca com um coqueiro escrito OKLAHOMA tá ligado é isso essa é sua vida mano entendeu curte a sua vida mano vc é assim viado é isso mesmo viado já pega seu tênis mizuno preto genérico sua camisa branca com coqueiro escrito Oklahoma genérica entendeu a sua namorada entendeu q é a Larissa q cursa odontologia entendeu na UNIP pega ela tb já vai pro show do coldplay curte o show do coldplay oooo e na saída vc vai pegar o seu corolla xei 2008 prata automático sem tesão sem tesão nenhum entra liga e vai pra casa chegando em casa vc dorme e pensa pensa o quanto vc é sem graça é isso porra" ]
+    #random_string = random.choice(lista_resposta)
 
     TRIGGERS_REPLY = {
     ("gorda", "gordinha"): "chaves_gif",
@@ -108,9 +108,9 @@ async def on_message(message):
         return
 
     # Links
-    if content.startswith(("http://", "https://")):
-        await message.reply(random_string)
-        return
+    #if content.startswith(("http://", "https://")):
+        #await message.reply(random_string)
+        #return
 
     # Apenas emoji
     if (
