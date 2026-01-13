@@ -7,6 +7,8 @@ import requests
 import unicodedata
 from google import genai
 import random
+import emoji
+
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
@@ -68,7 +70,7 @@ async def genai_mode(ctx):
 async def clear(ctx, amount: int):
     await ctx.send(f"Deletando {amount} mensagens...", delete_after=3)
     await ctx.channel.purge(limit=amount + 1)
-    await ctx.send(f"{amount} mensagens deletadas por {ctx.author.mention}", delete_after=3)
+    await ctx.send(f"{amount} mensagens deletadas por {ctx.author.mention}", delete_after=10)
 
 
 #Implementar memoria na AI do google
@@ -77,34 +79,53 @@ async def on_message(message):
     global genai_mode
     str_message = str(message.content)
     content = normalizar_texto(message.content.lower())
-    lista_resposta = ["que link legal", "sem graça", "nem ri", "XD"]
+    lista_resposta = ["que link legal", "sem graça", "nem ri", "XD", "que link bosta morre", "gostei desse link", "não achei graça", "rídiculo", ]
     random_string = random.choice(lista_resposta)
+
+    TRIGGERS_REPLY = {
+    ("gorda", "gordinha"): "chaves_gif",
+    ("povo prometido", "israel", "me prometeram", "prometeu", "me foi prometido"): "israel_gif",
+    ("linard", "linarde"): "linard_gif",
+    ("true", "verdade"): "true_gif",
+}
+
+
     # ignora mensagens do próprio bot
-    if message.author.bot:
+    if message.author.bot or genai_mode:
         return
-    elif genai_mode == False:
-        #Evento de resposta de palavras
-        #Melhorar usando triggers lambda
-        if any(word in content for word in ('gorda', 'gordinha')):
-            await message.reply(os.getenv("chaves_gif"))
+    
+    #Trigger replys
+    for palavras, env_key in TRIGGERS_REPLY.items():
+        if any(p in content for p in palavras):
+            await message.reply(os.getenv(env_key))
+            return
+        
+    # Trollface
+    if any(w in content for w in ("troll", "trollando", "trollface")):
+        if message.guild:
+            troll = next(
+                (e for e in message.guild.emojis if e.name == "trollface"),
+                None
+            )
+            if troll:
+                await message.add_reaction(troll)
+        return
 
-        elif any(word in content for word in ('povo prometido', 'israel')):
-            await message.reply(os.getenv("israel_gif"))
+    # Links
+    if content.startswith(("http://", "https://")):
+        await message.reply(random_string)
+        return
 
-        elif any(word in content for word in ('linard', 'linarde')):
-            await message.reply(os.getenv("linard_gif"))
+    # Apenas emoji
+    if (
+        emoji.emoji_count(content) > 0
+        and content.strip().replace(" ", "") in emoji.EMOJI_DATA
+        and message.guild
+        and message.guild.emojis
+    ):
+        await message.reply(str(random.choice(message.guild.emojis)))
 
-        elif any(word in content for word in ('true', 'verdade')):
-            await message.reply(os.getenv("true_gif"))
 
-        elif any(word in content for word in ('troll', 'trollando', 'trollface')):
-            if message.guild: 
-                for emoji in message.guild.emojis:
-                    if emoji.name == "trollface":
-                        await message.add_reaction(emoji)
-                        break
-        elif content.startswith("https") or content.startswith("http"):
-            await message.reply(random_string)
 
     # permite comandos funcionarem
     await client.process_commands(message)
